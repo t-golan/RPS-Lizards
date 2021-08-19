@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 ITERATIONS = 100
 TOT_AREA = 1000  # includes food?
 TOT_FEMALES = 100
-INIT_ORANGE_NUM = 100
-INIT_BLUE_NUM = 100
-INIT_YELLOW_NUM = 100
+INIT_ORANGE_NUM = 1000
+INIT_BLUE_NUM = 1000
+INIT_YELLOW_NUM = 1000
 POP_SIZE = INIT_ORANGE_NUM + INIT_BLUE_NUM + INIT_YELLOW_NUM
 FEMALE_FACTOR = 3  # todo: how to determine?
 AREA_FACTOR = 3  # todo: how to determine?
@@ -78,11 +78,18 @@ def RPS(first, second):
 
 
 def get_competitor(pop: World):
-    while True:
-        competitor = random.randint(1, 3)
-        if pop.get_amount(competitor) > 0:
-            pop.decrease(competitor)
-            return competitor
+    # while True:
+    #     competitor = random.randint(1, 3)
+    #     if pop.get_amount(competitor) > 0:
+    #         pop.decrease(competitor)
+    #         return competitor
+    pop.update_size()
+    competitor = random.randint(1, pop.size)
+    for i in range(1, 4):
+        if pop.get_amount(i) >= competitor:
+            pop.decrease(i)
+            return i
+        competitor -= pop.get_amount(i)
 
 
 def calc_yellows(oranges, yellows):
@@ -114,7 +121,7 @@ def dependant_next_gen(new_world):
         new_world[0], new_world[2])
     new_world[BLUE - 1] *= 2
     new_world[YELLOW - 1] = (int(new_world[0] > 0)) * (
-                POP_SIZE - new_world[1] - new_world[2])
+            POP_SIZE - new_world[1] - new_world[2])
 
 
 def basic_scenario(pop: World):
