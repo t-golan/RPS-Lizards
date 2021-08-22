@@ -140,6 +140,17 @@ def basic_scenario(pop: World):
         competitor2 = get_competitor(pop)
         winner = RPS(competitor1, competitor2)
         new_world[winner - 1] += 1
+
+
+def diff_basic_scenario(pop: World):
+    new_world = np.zeros(3)
+    competitor1 = get_competitor(pop)
+    for i in range(int(pop.size) - 1):
+        competitor2 = get_competitor(pop)
+        winner = RPS(competitor1, competitor2)
+        if winner == competitor2:
+            competitor1 = competitor2
+        new_world[winner - 1] += 1
     equal_next_gen(new_world)
     return World(new_world[0], new_world[1], new_world[2])
 
@@ -172,8 +183,8 @@ def crazy_pred_predator_scenario(pop: World, a, b, c, d, e, f, g, h, i):
     return World(new_world[0], new_world[1], new_world[2])
 
 
- # def female_sharedness(pop: World):
- #     X = array()
+# def female_sharedness(pop: World):
+#     X = array()
 
 
 if __name__ == '__main__':
@@ -184,9 +195,9 @@ if __name__ == '__main__':
     for i in range(ITERATIONS):
         oranges[i], blues[i], yellows[i] = \
             world.orange.amount, world.blue.amount, world.yellow.amount
-        # world = basic_scenario(world) #trial 1 - divergence
-        world = pred_predator_scenario(world, 1.08, 0.55, 0.3, 1.085, 0.55,
-                                       0.5443256027512, 0.6, 0.4, 0.25) #trial 2 - stable but blue extincts
+        world = basic_scenario(world)  # trial 1 - divergence
+        # world = pred_predator_scenario(world, 1.08, 0.55, 0.3, 1.085, 0.55,
+        #                                0.5443256027512, 0.6, 0.4, 0.25) #trial 2 - stable but blue extincts
         # world = female_sharedness(world)
         # print(oranges[i], blues[i], yellows[i]
     plt.plot(np.arange(ITERATIONS), oranges, color="orange")
