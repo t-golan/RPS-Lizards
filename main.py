@@ -3,7 +3,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-ITERATIONS = 300
+ITERATIONS = 3000
 TOT_AREA = 1000  # includes food?
 TOT_FEMALES = 100
 INIT_ORANGE_NUM = 1000
@@ -96,7 +96,7 @@ def get_competitor(pop: World):
 
 
 def calc_yellows(oranges, yellows):
-    return min(yellows * 2, oranges * 2)
+    return int(min(yellows * 2.3, oranges * 2.3))
 
 
 def equal_next_gen(new_world):
@@ -109,14 +109,17 @@ def equal_next_gen(new_world):
     new_world[ORANGE - 1] = int(new_world[ORANGE - 1] * 2)
     new_world[BLUE - 1] = int(new_world[BLUE - 1] * 2 + 1)
     new_world[YELLOW - 1] = int(new_world[YELLOW - 1] * 2 + 1)
+    no_extinct(new_world)
+    new_world[new_world.argmax()] //= 1.01
+
+
+def no_extinct(new_world):
     if new_world[BLUE - 1] < 1:
         new_world[BLUE - 1] = 1
     if new_world[YELLOW - 1] < 1:
         new_world[BLUE - 1] = 1
     if new_world[ORANGE - 1] < 1:
         new_world[ORANGE - 1] = 1
-    new_world[new_world.argmax()] //= 1.01
-
 
 
 def dependant_next_gen(new_world):
@@ -128,11 +131,12 @@ def dependant_next_gen(new_world):
     :param new_world:
     :return:
     """
-    new_world[ORANGE - 1] = (int(new_world[2] > 0)) * calc_yellows(
+    new_world[ORANGE - 1] = calc_yellows(
         new_world[0], new_world[2])
-    new_world[BLUE - 1] *= 2
-    new_world[YELLOW - 1] = (int(new_world[0] > 0)) * (
+    new_world[BLUE - 1] = int(1.7 * new_world[BLUE - 1])
+    new_world[YELLOW - 1] =  (
             POP_SIZE - new_world[1] - new_world[2])
+    no_extinct(new_world)
 
 
 def basic_scenario(pop: World):
@@ -148,7 +152,7 @@ def basic_scenario(pop: World):
         competitor2 = get_competitor(pop)
         winner = RPS(competitor1, competitor2)
         new_world[winner - 1] += 1
-    equal_next_gen(new_world)
+    dependant_next_gen(new_world)
     return World(new_world[0], new_world[1], new_world[2])
 
 
