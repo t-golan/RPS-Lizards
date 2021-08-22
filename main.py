@@ -3,7 +3,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-ITERATIONS = 3000
+ITERATIONS = 300
 TOT_AREA = 1000  # includes food?
 TOT_FEMALES = 100
 INIT_ORANGE_NUM = 1000
@@ -106,9 +106,17 @@ def equal_next_gen(new_world):
     :param new_world:
     :return:
     """
-    new_world[ORANGE - 1] *= 2
-    new_world[BLUE - 1] *= 2
-    new_world[YELLOW - 1] *= 2
+    new_world[ORANGE - 1] = int(new_world[ORANGE - 1] * 2)
+    new_world[BLUE - 1] = int(new_world[BLUE - 1] * 2 + 1)
+    new_world[YELLOW - 1] = int(new_world[YELLOW - 1] * 2 + 1)
+    if new_world[BLUE - 1] < 1:
+        new_world[BLUE - 1] = 1
+    if new_world[YELLOW - 1] < 1:
+        new_world[BLUE - 1] = 1
+    if new_world[ORANGE - 1] < 1:
+        new_world[ORANGE - 1] = 1
+    new_world[new_world.argmax()] //= 1.01
+
 
 
 def dependant_next_gen(new_world):
@@ -140,6 +148,8 @@ def basic_scenario(pop: World):
         competitor2 = get_competitor(pop)
         winner = RPS(competitor1, competitor2)
         new_world[winner - 1] += 1
+    equal_next_gen(new_world)
+    return World(new_world[0], new_world[1], new_world[2])
 
 
 def diff_basic_scenario(pop: World):
@@ -183,8 +193,8 @@ def crazy_pred_predator_scenario(pop: World, a, b, c, d, e, f, g, h, i):
     return World(new_world[0], new_world[1], new_world[2])
 
 
-# def female_sharedness(pop: World):
-#     X = array()
+ # def female_sharedness(pop: World):
+ #     X = array()
 
 
 if __name__ == '__main__':
@@ -195,7 +205,7 @@ if __name__ == '__main__':
     for i in range(ITERATIONS):
         oranges[i], blues[i], yellows[i] = \
             world.orange.amount, world.blue.amount, world.yellow.amount
-        world = basic_scenario(world)  # trial 1 - divergence
+        world = basic_scenario(world) #trial 1 - divergence
         # world = pred_predator_scenario(world, 1.08, 0.55, 0.3, 1.085, 0.55,
         #                                0.5443256027512, 0.6, 0.4, 0.25) #trial 2 - stable but blue extincts
         # world = female_sharedness(world)
