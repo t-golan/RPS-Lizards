@@ -3,7 +3,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-ITERATIONS = 100
+ITERATIONS = 3000
 TOT_AREA = 1000  # includes food?
 TOT_FEMALES = 100
 INIT_ORANGE_NUM = 1000
@@ -16,13 +16,16 @@ AREA_FACTOR = 3  # todo: how to determine?
 ORANGE = 1
 BLUE = 2
 YELLOW = 3
+DOM = 0
+SHR = 1
 
 
 class World:
-    def __init__(self, orange, blue, yellow):
+    def __init__(self, orange, blue, yellow, fitness=0):
         self.orange = Lizards(ORANGE, orange)
         self.blue = Lizards(BLUE, blue)
         self.yellow = Lizards(YELLOW, yellow)
+        self.fitness = fitness
         self.size = orange + blue + yellow
 
     def update_size(self):
@@ -141,6 +144,38 @@ def basic_scenario(pop: World):
     return World(new_world[0], new_world[1], new_world[2])
 
 
+def pred_predator_scenario(pop: World, a, b, c, d, e, f, g, h, i):
+    new_world = np.zeros(3)
+    new_world[0] = a * pop.get_amount(ORANGE) + b * pop.get_amount(
+        BLUE) - c * pop.get_amount(YELLOW)
+    if new_world[0] < 1:
+        new_world[0] = 1
+    new_world[1] = d * pop.get_amount(BLUE) + e * pop.get_amount(
+        YELLOW) - f * pop.get_amount(ORANGE)
+    if new_world[1] < 1:
+        new_world[1] = 1
+    new_world[2] = g * pop.get_amount(YELLOW) + h * pop.get_amount(
+        ORANGE) - i * pop.get_amount(BLUE)
+    if new_world[2] < 1:
+        new_world[2] = 1
+    return World(new_world[0], new_world[1], new_world[2])
+
+
+def crazy_pred_predator_scenario(pop: World, a, b, c, d, e, f, g, h, i):
+    new_world = np.zeros(3)
+    new_world[0] = pop.get_amount(ORANGE) * (
+            a + b * pop.get_amount(BLUE) - c * pop.get_amount(YELLOW))
+    new_world[1] = pop.get_amount(BLUE) * (
+            d + e * pop.get_amount(YELLOW) - f * pop.get_amount(ORANGE))
+    new_world[2] = pop.get_amount(YELLOW) * (
+            g + h * pop.get_amount(ORANGE) - i * pop.get_amount(BLUE))
+    return World(new_world[0], new_world[1], new_world[2])
+
+
+ # def female_sharedness(pop: World):
+ #     X = array()
+
+
 if __name__ == '__main__':
     world = World(INIT_ORANGE_NUM, INIT_BLUE_NUM, INIT_YELLOW_NUM)
     oranges = np.zeros(ITERATIONS)
@@ -149,8 +184,11 @@ if __name__ == '__main__':
     for i in range(ITERATIONS):
         oranges[i], blues[i], yellows[i] = \
             world.orange.amount, world.blue.amount, world.yellow.amount
-        world = basic_scenario(world)
-        # print(oranges[i], blues[i], yellows[i])
+        # world = basic_scenario(world) #trial 1 - divergence
+        world = pred_predator_scenario(world, 1.08, 0.55, 0.3, 1.085, 0.55,
+                                       0.5443256027512, 0.6, 0.4, 0.25) #trial 2 - stable but blue extincts
+        # world = female_sharedness(world)
+        # print(oranges[i], blues[i], yellows[i]
     plt.plot(np.arange(ITERATIONS), oranges, color="orange")
     plt.plot(np.arange(ITERATIONS), blues, color="b")
     plt.plot(np.arange(ITERATIONS), yellows, color="yellow")
