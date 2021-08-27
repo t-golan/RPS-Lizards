@@ -2,14 +2,14 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-ITERATIONS = 100
+ITERATIONS = 200
 TOT_AREA = 1000
 TOT_FEMALES = 100
 INIT_ORANGE_NUM = 30
 INIT_BLUE_NUM = 30
 INIT_YELLOW_NUM = 30
 POP_SIZE = INIT_ORANGE_NUM + INIT_BLUE_NUM + INIT_YELLOW_NUM
-MUTATION_RATE = 0.3
+MUTATION_RATE = 0.1
 
 ORANGE = 0
 BLUE = 1
@@ -133,9 +133,10 @@ def equal_next_gen(new_world):
     new_world[ORANGE] = int(new_world[ORANGE] * 2)
     new_world[BLUE] = int(new_world[BLUE] * 2)  # also changed here?
     new_world[YELLOW] = int(new_world[YELLOW] * 2)
-    if mutate():
-        new_world[random.randrange(0, 3)] += 1
-        new_world[random.randrange(0, 3)] -= 1
+    for _ in range(POP_SIZE):
+        if mutate():
+            new_world[random.randrange(0, 3)] += 1
+            new_world[random.randrange(0, 3)] -= 1
     # extinct = no_extinct(new_world)
     # if extinct:
           # new_world[new_world.argmax()] //= 1.035
@@ -179,7 +180,8 @@ def dependant_next_gen(new_world):
     """
     new_world[ORANGE] = (POP_SIZE - new_world[BLUE] - new_world[YELLOW])
     new_world[YELLOW] = calc_yellows(new_world[ORANGE], new_world[YELLOW])
-    new_world[BLUE] = int(2 * new_world[BLUE])
+    new_world[BLUE] = int(2.2 * new_world[BLUE])
+    # new_world[ORANGE] = int(2.2 * new_world[ORANGE])
     no_extinct(new_world)
 
 
@@ -196,8 +198,8 @@ def basic_scenario(pop: World):
         competitor2 = get_competitor(pop)
         winner = RPS(competitor1, competitor2)
         new_world[winner] += 1
-    dependant_next_gen(new_world)
-    # equal_next_gen(new_world)
+    # dependant_next_gen(new_world)
+    equal_next_gen(new_world)
     return World(new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
 
 
@@ -226,7 +228,7 @@ def eating_scenario(pop: World):
     :return: World of the next generation
     """
     new_world = np.zeros(3)
-    for i in range(int(pop.size) // 2):
+    for _ in range(int(pop.size) // 2):
         competitor1, competitor2 = get_competitor(pop), get_competitor(pop)
         while competitor1 == competitor2:  # we don't like ties
             # only one color left
@@ -236,7 +238,7 @@ def eating_scenario(pop: World):
                 return_competitor(pop, competitor1)
                 return_competitor(pop, competitor2)
                 equal_distributed_next_gen(new_world, int(pop.yellow + pop.orange + pop.blue))
-                return World(new_world[0], new_world[1], new_world[2])
+                return World(new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
             return_competitor(pop, competitor2)
             competitor2 = get_competitor(pop)
         winner = RPS(competitor1, competitor2)
@@ -252,7 +254,7 @@ def live_long_and_prosper(pop: World):
     :return: World of the next generation
     """
     new_world = np.zeros(3)
-    for i in range(int(pop.size) // 2):
+    for _ in range(int(pop.size) // 2):
         competitor1 = get_competitor(pop)
         new_world[competitor1] += 1
         competitor2 = get_competitor(pop)
@@ -283,14 +285,17 @@ if __name__ == '__main__':
     blues = np.zeros(ITERATIONS)
     yellows = np.zeros(ITERATIONS)
     for i in range(ITERATIONS):
-        oranges[i], blues[i], yellows[i] = world.orange, world.blue, world.yellow
-        # world = basic_scenario(world)  # trial 2
+        tot_pop = world.orange + world.blue + world.yellow
+        oranges[i], blues[i], yellows[i] = world.orange / tot_pop, world.blue / tot_pop, world.yellow / tot_pop
+        world = basic_scenario(world)  # trial 2
         # world = live_long_and_prosper(world)  # trial 2
-        world = eating_scenario(world)  # trial 1
+        # world = eating_scenario(world)  # trial 1
         # world = pred_predator_scenario(world, (1.01, 0.55, 0.3, 1.085, 0.55,
         #                                        0.5443256027512, 0.6, 0.4, 0.25))  # trial 4 - stable but blue extincts
     plt.plot(np.arange(ITERATIONS), oranges, color="orange")
     plt.plot(np.arange(ITERATIONS), blues, color="b")
     plt.plot(np.arange(ITERATIONS), yellows, color="yellow")
+    plt.xlabel("Generation", fontsize=16)
+    plt.ylabel("Morph frequency", fontsize=16)
 
     plt.show()
