@@ -3,11 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ITERATIONS = 100
-TOT_AREA = 1000
+TOT_AREA = 1000  # includes food?
 TOT_FEMALES = 100
-INIT_ORANGE_NUM = 30
-INIT_BLUE_NUM = 30
-INIT_YELLOW_NUM = 30
+INIT_ORANGE_NUM = 100
+INIT_BLUE_NUM = 100
+INIT_YELLOW_NUM = 100
 POP_SIZE = INIT_ORANGE_NUM + INIT_BLUE_NUM + INIT_YELLOW_NUM
 MUTATION_RATE = 0.3
 
@@ -107,14 +107,14 @@ def return_competitor(pop: World, competitor):
     pop.update_size()
 
 
-def calc_yellows(oranges, yellows):
+def calc_depended(predator, pred):
     """
 
-    :param oranges:
-    :param yellows:
+    :param pred:
+    :param predator:
     :return:
     """
-    return int(min(yellows * 2.1, oranges * 2.1))
+    return int(min(predator * 2.3, pred * 2.3))
 
 
 def mutate():
@@ -157,16 +157,12 @@ def equal_distributed_next_gen(new_world, num):
 
 
 def no_extinct(new_world):
-    """
-    prevents an occasion of extinction of one of the morphs
-    :param new_world: the distribution of the next generation
-    """
-    if new_world[BLUE] < 1:
-        new_world[BLUE] = 1
-    if new_world[YELLOW] < 1:
-        new_world[YELLOW] = 1
-    if new_world[ORANGE] < 1:
-        new_world[ORANGE] = 1
+    if new_world[BLUE - 1] < 1:
+        new_world[BLUE - 1] = 1
+    if new_world[YELLOW - 1] < 1:
+        new_world[BLUE - 1] = 1
+    if new_world[ORANGE - 1] < 1:
+        new_world[ORANGE - 1] = 1
 
 
 def dependant_next_gen(new_world):
@@ -177,10 +173,11 @@ def dependant_next_gen(new_world):
     orange ___ the rest
     :param new_world: the distribution of the next generation
     """
-    new_world[ORANGE] = (POP_SIZE - new_world[BLUE] - new_world[YELLOW])
-    new_world[YELLOW] = calc_yellows(new_world[ORANGE], new_world[YELLOW])
-    new_world[BLUE] = int(2 * new_world[BLUE])
-    no_extinct(new_world)
+    new_world[YELLOW] = calc_depended(new_world[ORANGE], new_world[YELLOW])
+    new_world[BLUE] = calc_depended(new_world[BLUE], new_world[ORANGE])
+    new_world[ORANGE] = int((POP_SIZE - new_world[BLUE] - new_world[YELLOW]))
+    # new_world[ORANGE] = int(1.7 * new_world[BLUE])
+    # no_extinct(new_world)
 
 
 def basic_scenario(pop: World):
@@ -284,11 +281,10 @@ if __name__ == '__main__':
     yellows = np.zeros(ITERATIONS)
     for i in range(ITERATIONS):
         oranges[i], blues[i], yellows[i] = world.orange, world.blue, world.yellow
-        # world = basic_scenario(world)  # trial 2
+        world = basic_scenario(world)  # trial 2
         # world = live_long_and_prosper(world)  # trial 2
-        world = eating_scenario(world)  # trial 1
-        # world = pred_predator_scenario(world, (1.01, 0.55, 0.3, 1.085, 0.55,
-        #                                        0.5443256027512, 0.6, 0.4, 0.25))  # trial 4 - stable but blue extincts
+        # world = eating_scenario(world)  # trial 1
+        # world = pred_predator_scenario(world, (1.01, 0.55, 0.3, 1.085, 0.55, 0.5443256027512, 0.6, 0.4, 0.25))  # trial 4 - stable but blue extincts
     plt.plot(np.arange(ITERATIONS), oranges, color="orange")
     plt.plot(np.arange(ITERATIONS), blues, color="b")
     plt.plot(np.arange(ITERATIONS), yellows, color="yellow")
