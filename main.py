@@ -1,4 +1,3 @@
-# בתור פמיניסט אני אומר את זה
 import random
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,7 +30,10 @@ class World:
         self.size = orange + blue + yellow
 
     def update_size(self):
-        self.size = self.orange.amount + self.blue.amount + self.yellow.amount
+        """
+        updates the size of the population
+        """
+        self.size = self.orange + self.blue + self.yellow
 
     def get_amount(self, color):
         """
@@ -40,11 +42,11 @@ class World:
         :return: an int
         """
         if color == ORANGE:
-            return self.orange.amount
+            return self.orange
         if color == BLUE:
-            return self.blue.amount
+            return self.blue
         if color == YELLOW:
-            return self.yellow.amount
+            return self.yellow
 
     def decrease(self, color):
         """
@@ -52,25 +54,11 @@ class World:
         :param color: the color of chosen lizard
         """
         if color == ORANGE:
-            self.orange.amount -= 1
+            self.orange -= 1
         if color == BLUE:
-            self.blue.amount -= 1
+            self.blue -= 1
         if color == YELLOW:
             self.yellow -= 1
-
-    def calc_females(self):
-        if self.color == YELLOW:
-            return 0
-        elif self.color == BLUE:
-            return self.amount
-        return self.amount * FEMALE_FACTOR
-
-    def calc_area(self):
-        if self.color == YELLOW:
-            return 0
-        elif self.color == BLUE:
-            return self.amount
-        return self.amount * AREA_FACTOR
 
 
 def RPS(first, second):
@@ -96,7 +84,7 @@ def get_competitor(pop: World):
     :return: one chosen color of lizard which is still available in the population
     """
     competitor = random.randint(1, pop.size)
-    for i in range(1, 4):
+    for i in range(0, 3):
         if pop.get_amount(i) >= competitor:
             pop.decrease(i)
             pop.update_size()
@@ -169,13 +157,16 @@ def equal_distributed_next_gen(new_world, num):
 
 
 def no_extinct(new_world):
-    if new_world[BLUE - 1] < 1:
-        new_world[BLUE - 1] = 1
-    if new_world[YELLOW - 1] < 1:
-        new_world[BLUE - 1] = 1
-    if new_world[ORANGE - 1] < 1:
-        new_world[ORANGE - 1] = 1
-
+    """
+    prevents an occasion of extinction of one of the morphs
+    :param new_world: the distribution of the next generation
+    """
+    if new_world[BLUE] < 1:
+        new_world[BLUE] = 1
+    if new_world[YELLOW] < 1:
+        new_world[YELLOW] = 1
+    if new_world[ORANGE] < 1:
+        new_world[ORANGE] = 1
 
 
 def dependant_next_gen(new_world):
@@ -186,11 +177,9 @@ def dependant_next_gen(new_world):
     orange ___ the rest
     :param new_world: the distribution of the next generation
     """
-    new_world[ORANGE - 1] = calc_yellows(
-        new_world[0], new_world[2])
-    new_world[BLUE - 1] = int(1.7 * new_world[BLUE - 1])
-    new_world[YELLOW - 1] = (
-            POP_SIZE - new_world[1] - new_world[2])
+    new_world[ORANGE] = (POP_SIZE - new_world[BLUE] - new_world[YELLOW])
+    new_world[YELLOW] = calc_yellows(new_world[ORANGE], new_world[YELLOW])
+    new_world[BLUE] = int(2 * new_world[BLUE])
     no_extinct(new_world)
 
 
@@ -265,43 +254,28 @@ def live_long_and_prosper(pop: World):
     new_world = np.zeros(3)
     for i in range(int(pop.size) // 2):
         competitor1 = get_competitor(pop)
-        new_world[competitor1 - 1] += 1
+        new_world[competitor1] += 1
         competitor2 = get_competitor(pop)
         winner = RPS(competitor1, competitor2)
-        new_world[winner - 1] += 1
-    return World(new_world[0], new_world[1], new_world[2])
+        new_world[winner] += 1
+    return World(new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
 
 
-def pred_predator_scenario(pop: World, a, b, c, d, e, f, g, h, i):
+def pred_predator_scenario(pop: World, params):
+    """
+
+    :param pop: the current population
+    :param params: specific parameters which control the generation of the next generation
+    :return: World of the next generation
+    """
     new_world = np.zeros(3)
-    new_world[0] = a * pop.get_amount(ORANGE) + b * pop.get_amount(
-        BLUE) - c * pop.get_amount(YELLOW)
-    if new_world[0] < 1:
-        new_world[0] = 1
-    new_world[1] = d * pop.get_amount(BLUE) + e * pop.get_amount(
-        YELLOW) - f * pop.get_amount(ORANGE)
-    if new_world[1] < 1:
-        new_world[1] = 1
-    new_world[2] = g * pop.get_amount(YELLOW) + h * pop.get_amount(
-        ORANGE) - i * pop.get_amount(BLUE)
-    if new_world[2] < 1:
-        new_world[2] = 1
-    return World(new_world[0], new_world[1], new_world[2])
+    for i in range(3):
+        new_world[i] = params[3 * i] * pop.get_amount(i) + params[3 * i + 1] * pop.get_amount(
+            (i + 1) % 3) - params[3 * i + 2] * pop.get_amount((i + 2) % 3)
+        if new_world[i] < 1:
+            new_world[i] = 1
+    return World(new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
 
-
-def crazy_pred_predator_scenario(pop: World, a, b, c, d, e, f, g, h, i):
-    new_world = np.zeros(3)
-    new_world[0] = pop.get_amount(ORANGE) * (
-            a + b * pop.get_amount(BLUE) - c * pop.get_amount(YELLOW))
-    new_world[1] = pop.get_amount(BLUE) * (
-            d + e * pop.get_amount(YELLOW) - f * pop.get_amount(ORANGE))
-    new_world[2] = pop.get_amount(YELLOW) * (
-            g + h * pop.get_amount(ORANGE) - i * pop.get_amount(BLUE))
-    return World(new_world[0], new_world[1], new_world[2])
-
-
-# def female_sharedness(pop: World):
-#     X = array()
 
 if __name__ == '__main__':
     world = World(INIT_ORANGE_NUM, INIT_BLUE_NUM, INIT_YELLOW_NUM)
@@ -319,5 +293,4 @@ if __name__ == '__main__':
     plt.plot(np.arange(ITERATIONS), blues, color="b")
     plt.plot(np.arange(ITERATIONS), yellows, color="yellow")
 
-    # plt.legend(["orange", "blue", "yellow"])
     plt.show()
