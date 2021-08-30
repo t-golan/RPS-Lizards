@@ -279,6 +279,15 @@ def pred_predator_scenario(pop: World, params):
     return World(new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
 
 
+def create_graph(oranges_num, blues_num, yellows_num, length):
+    plt.plot(np.arange(length), oranges_num, color="orange")
+    plt.plot(np.arange(length), blues_num, color="b")
+    plt.plot(np.arange(length), yellows_num, color="yellow")
+    plt.xlabel("Generation", fontsize=16)
+    plt.ylabel("Morph frequency", fontsize=16)
+    return plt
+
+
 if __name__ == '__main__':
     world = World(INIT_ORANGE_NUM, INIT_BLUE_NUM, INIT_YELLOW_NUM)
     oranges = np.zeros(ITERATIONS)
@@ -292,10 +301,5 @@ if __name__ == '__main__':
         # world = eating_scenario(world)  # trial 1
         # world = pred_predator_scenario(world, (1.01, 0.55, 0.3, 1.085, 0.55,
         #                                        0.5443256027512, 0.6, 0.4, 0.25))  # trial 4 - stable but blue extincts
-    plt.plot(np.arange(ITERATIONS), oranges, color="orange")
-    plt.plot(np.arange(ITERATIONS), blues, color="b")
-    plt.plot(np.arange(ITERATIONS), yellows, color="yellow")
-    plt.xlabel("Generation", fontsize=16)
-    plt.ylabel("Morph frequency", fontsize=16)
-
+    plt = create_graph(oranges, blues, yellows, ITERATIONS)
     plt.show()
