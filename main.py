@@ -84,12 +84,12 @@ def get_competitor(pop: World):
     :return: one chosen color of lizard which is still available in the population
     """
     competitor = random.randint(1, pop.size)
-    for i in range(0, 3):
-        if pop.get_amount(i) >= competitor:
-            pop.decrease(i)
+    for index in range(0, 3):
+        if pop.get_amount(index) >= competitor:
+            pop.decrease(index)
             pop.update_size()
-            return i
-        competitor -= pop.get_amount(i)
+            return index
+        competitor -= pop.get_amount(index)
 
 
 def return_competitor(pop: World, competitor):
@@ -139,22 +139,23 @@ def equal_next_gen(new_world):
             new_world[random.randrange(0, 3)] -= 1
     # extinct = no_extinct(new_world)
     # if extinct:
-          # new_world[new_world.argmax()] //= 1.035
-          # print("extincted", new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
+    # new_world[new_world.argmax()] //= 1.035
+    # print("extincted", new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
 
 
 def equal_distributed_next_gen(new_world, num):
     """
     calculates the production of the next generation -
     everyone doubles itself
+    :param num: the number of objects we add
     :param new_world: the distribution of the next generation
     """
     div = 2
     new_world[ORANGE] = round(new_world[ORANGE] * div)
     new_world[BLUE] = round(new_world[BLUE] * div)
     new_world[YELLOW] = round(new_world[YELLOW] * div)
-    for i in range(num, 2 * num):
-        new_world[i % 3] += 1
+    for num in range(num, 2 * num):
+        new_world[num % 3] += 1
 
 
 def no_extinct(new_world):
@@ -211,7 +212,7 @@ def diff_basic_scenario(pop: World):
     """
     new_world = np.zeros(3)
     competitor1 = get_competitor(pop)
-    for i in range(int(pop.size) - 1):
+    for pop_index in range(int(pop.size) - 1):
         competitor2 = get_competitor(pop)
         winner = RPS(competitor1, competitor2)
         if winner == competitor2:
@@ -271,11 +272,11 @@ def pred_predator_scenario(pop: World, params):
     :return: World of the next generation
     """
     new_world = np.zeros(3)
-    for i in range(3):
-        new_world[i] = params[3 * i] * pop.get_amount(i) + params[3 * i + 1] * pop.get_amount(
-            (i + 1) % 3) - params[3 * i + 2] * pop.get_amount((i + 2) % 3)
-        if new_world[i] < 1:
-            new_world[i] = 1
+    for num in range(3):
+        new_world[num] = params[3 * num] * pop.get_amount(num) + params[3 * num + 1] * pop.get_amount(
+            (num + 1) % 3) - params[3 * num + 2] * pop.get_amount((num + 2) % 3)
+        if new_world[num] < 1:
+            new_world[num] = 1
     return World(new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
 
 
