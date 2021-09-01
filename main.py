@@ -2,14 +2,11 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-ITERATIONS = 100
-TOT_AREA = 1000  # includes food?
-TOT_FEMALES = 100
+ITERATIONS = 50
 INIT_ORANGE_NUM = 100
 INIT_BLUE_NUM = 100
 INIT_YELLOW_NUM = 100
 POP_SIZE = INIT_ORANGE_NUM + INIT_BLUE_NUM + INIT_YELLOW_NUM
-MUTATION_RATE = 0.1
 
 ORANGE = 0
 BLUE = 1
@@ -114,27 +111,28 @@ def calc_depended(predator, pred):
     :param predator:
     :return:
     """
-    return int(min(predator * 2.3, pred * 2.3))
+    return int(2.3 * min(predator, pred))
 
 
-def mutate():
+def mutate(mutation_rate):
     chance = random.uniform(0, 1)
-    if chance < MUTATION_RATE:
+    if chance < mutation_rate:
         return True
     return False
 
 
-def equal_next_gen(new_world):
+def equal_next_gen(new_world, mutation_rate=0.1):
     """
     calculates the production of the next generation -
     everyone doubles itself
+    :param mutate:
     :param new_world: the distribution of the next generation
     """
     new_world[ORANGE] = int(new_world[ORANGE] * 2)
     new_world[BLUE] = int(new_world[BLUE] * 2)  # also changed here?
     new_world[YELLOW] = int(new_world[YELLOW] * 2)
     for _ in range(POP_SIZE):
-        if mutate():
+        if mutation_rate > 0 and mutate(mutation_rate):
             new_world[random.randrange(0, 3)] += 1
             new_world[random.randrange(0, 3)] -= 1
     # extinct = no_extinct(new_world)
@@ -199,8 +197,8 @@ def basic_scenario(pop: World):
         competitor2 = get_competitor(pop)
         winner = RPS(competitor1, competitor2)
         new_world[winner] += 1
-    # dependant_next_gen(new_world)
-    equal_next_gen(new_world)
+    dependant_next_gen(new_world)
+    # equal_next_gen(new_world, mutation_rate=0.1)
     return World(new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
 
 
@@ -300,7 +298,6 @@ if __name__ == '__main__':
         world = basic_scenario(world)  # trial 2
         # world = live_long_and_prosper(world)  # trial 2
         # world = eating_scenario(world)  # trial 1
-        # world = pred_predator_scenario(world, (1.01, 0.55, 0.3, 1.085, 0.55,
-        #                                        0.5443256027512, 0.6, 0.4, 0.25))  # trial 4 - stable but blue extincts
+        # world = pred_predator_scenario(world, (1.01, 0.55, 0.3, 1.085, 0.55, 0.5443256027512, 0.6, 0.4, 0.25))  # trial 4 - stable but blue extincts)
     plt = create_graph(oranges, blues, yellows, ITERATIONS)
     plt.show()
