@@ -2,7 +2,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-ITERATIONS = 50
+ITERATIONS = 100
 INIT_ORANGE_NUM = 100
 INIT_BLUE_NUM = 100
 INIT_YELLOW_NUM = 100
@@ -12,6 +12,7 @@ ORANGE = 0
 BLUE = 1
 YELLOW = 2
 
+DIRECT_PARAMS = (1.01, 0.55, 0.3, 1.085, 0.55, 0.5443256027512, 0.6, 0.4, 0.25)
 
 class World:
     def __init__(self, orange, blue, yellow):
@@ -106,7 +107,6 @@ def return_competitor(pop: World, competitor):
 
 def calc_depended(predator, pred):
     """
-
     :param pred:
     :param predator:
     :return:
@@ -180,11 +180,9 @@ def dependant_next_gen(new_world):
     new_world[YELLOW] = calc_depended(new_world[ORANGE], new_world[YELLOW])
     new_world[BLUE] = calc_depended(new_world[BLUE], new_world[ORANGE])
     new_world[ORANGE] = int((POP_SIZE - new_world[BLUE] - new_world[YELLOW]))
-    # new_world[ORANGE] = int(1.7 * new_world[BLUE])
-    # no_extinct(new_world)
 
 
-def basic_scenario(pop: World):
+def TRPS(pop: World, mode):
     """
     randomly chooses pairs from the population and the winner stays to the next generation
     assumptions: area is unlimited, winner blue produces 2 blues, winner yellow produces yellows as a function of the
@@ -197,9 +195,12 @@ def basic_scenario(pop: World):
         competitor2 = get_competitor(pop)
         winner = RPS(competitor1, competitor2)
         new_world[winner] += 1
-    dependant_next_gen(new_world)
-    # equal_next_gen(new_world, mutation_rate=0.1)
+    if mode == "mutations":
+        equal_next_gen(new_world, mutation_rate=0.1)
+    if mode == "dependent":
+        dependant_next_gen(new_world)
     return World(new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
+
 
 
 def diff_basic_scenario(pop: World):
@@ -262,7 +263,7 @@ def live_long_and_prosper(pop: World):
     return World(new_world[ORANGE], new_world[BLUE], new_world[YELLOW])
 
 
-def pred_predator_scenario(pop: World, params):
+def direct_calc(pop: World, params):
     """
 
     :param pop: the current population
@@ -295,9 +296,12 @@ if __name__ == '__main__':
     for i in range(ITERATIONS):
         tot_pop = world.orange + world.blue + world.yellow
         oranges[i], blues[i], yellows[i] = world.orange / tot_pop, world.blue / tot_pop, world.yellow / tot_pop
-        world = basic_scenario(world)  # trial 2
-        # world = live_long_and_prosper(world)  # trial 2
+        # world = RPST(world, mode="basic")  # trial 2
+        world = TRPS(world, mode="mutations")
+        # world = TRPS(world, mode="dependent")
+        # FIXME: world = live_long_and_prosper(world)  # trial 2
+
+        # world = direct_calc(world, DIRECT_PARAMS)  # trial 4 - stable but blue extincts)
         # world = eating_scenario(world)  # trial 1
-        # world = pred_predator_scenario(world, (1.01, 0.55, 0.3, 1.085, 0.55, 0.5443256027512, 0.6, 0.4, 0.25))  # trial 4 - stable but blue extincts)
     plt = create_graph(oranges, blues, yellows, ITERATIONS)
     plt.show()
