@@ -223,7 +223,7 @@ def diff_basic_scenario(pop: World):
 
 def eating_scenario(pop: World):
     """
-    model where one color has to beat different color in order to survive to thee next generation
+    model where one color has to beat different color in order to survive to the next generation
     :param pop: the current population
     :return: World of the next generation
     """
